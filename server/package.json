@@ -1,0 +1,22 @@
+{
+  "name": "@sams-podcast-app/server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "dependencies": {
+    "@prisma/client": "^3.2.1",
+    "dotenv": "^10.0.0",
+    "fastify": "^3.22.0",
+    "fastify-cors": "^6.0.2"
+  },
+  "type": "module",
+  "devDependencies": {
+    "nodemon": "^2.0.13",
+    "prisma": "^3.2.1"
+  },
+  "scripts": {
+    "start": "nodemon ./src/index.js"
+  },
+  "author": "Sam Bigelow",
+  "license": "ISC"
+}
