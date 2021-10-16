@@ -1,5 +1,5 @@
 <script>
-  let username;
+  let email;
   let password;
   // Can be:
   // 1. idle
@@ -16,7 +16,7 @@
       fetch('/api/register', {
         method: 'POST',
         body: JSON.stringify({
-          username,
+          email,
           password
         })
       })
@@ -45,7 +45,7 @@
 <form on:submit|preventDefault={handleSubmit}>
   <label>
     Email:
-    <input bind:value={username} type="email">
+    <input bind:value={email} type="email">
   </label>
   <label>
     Password:
