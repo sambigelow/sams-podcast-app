@@ -1,52 +1,49 @@
-import fastify from 'fastify'
-import dotenv from 'dotenv'
-import { prismaPlugin } from './prismaPlugin.js'
-import bcrypt from 'bcrypt'
+import Fastify from "fastify"
+import { PORT } from "./env.js"
+import { prismaPlugin } from "./plugins/prismaPlugin.js"
+import { registrationRoutes } from "./routes/registration.js"
 
-const { genSalt, hash } = bcrypt
+const fastify = Fastify()
 
-dotenv.config()
+fastify.addContentTypeParser(
+	"application/json",
+	{ parseAs: "string" },
+	function (req, body, done) {
+		try {
+			var json = JSON.parse(body)
+			done(null, json)
+		} catch (err) {
+			err.statusCode = 400
+			done(err, undefined)
+		}
+	}
+)
 
-const app = fastify()
+fastify.register(prismaPlugin)
 
-app.register(prismaPlugin)
+// Routes
+fastify.register(registrationRoutes)
+
+fastify.setErrorHandler(function (error, _request, reply) {
+	console.log("Handling error...")
+	console.log(error)
+	reply.send(500)
+})
 
 async function startApp() {
-  const PORT = process.env.PORT
+	try {
+		// CATCH ALL
+		fastify.get("*", (req, reply) => {
+			console.log("No matching route")
+			console.log(req)
+			reply.send(404)
+		})
 
-  try {
-    app.post('/register', {}, async ({ body }) => {
-      try {
-        const { password, email } = JSON.parse(body)
-        console.log({ body, password, email })
-
-        const salt = await genSalt(10)
-        const hashedPassword = await hash(password, salt)
-
-        const user = await app.prisma.user.create({
-          data: {
-            email,
-            hashedPassword
-          }
-        })
-        return user.id
-      } catch (e) {
-        console.error('Error creating user: ', e)
-        throw new Error(e)
-      }
-    })
-
-    // CATCH ALL
-    app.get('*', (request) => {
-      console.log('Failed to get!')
-      console.log(request)
-    })
-
-    await app.listen(PORT)
-    console.log(`app listening on port ${PORT}`)
-  } catch (e) {
-    console.log(e)
-  }
+		await fastify.listen(PORT)
+		console.log(`app listening on port ${PORT}`)
+	} catch (e) {
+		console.log(e)
+	}
 }
 
 startApp()
